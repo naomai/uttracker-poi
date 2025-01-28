@@ -1,0 +1,22 @@
+unrealpoi:
+    game:
+        # Main Unreal Engine instance
+        #
+        # Serves as native Unreal Engine component of UnrealPOI:
+        #   it provides UCC tool, and will store all downloads in its directories
+        # It is recommended to be a standalone instance - only for this single purpose
+        main: "C:\\Users\\tmdvt\\Desktop\\games\\UnrealTournament\\"
+
+        # Additional read-only instances
+        # Allows to use content from cache of your gaming installation
+        additional: []
+    
+    linkstore:
+        refresh_interval_min: 10080 # 7 days
+    
+    downloads:
+        temp_dir: "./temp/"
+    
+
+        
+    
