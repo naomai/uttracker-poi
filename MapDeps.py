@@ -27,6 +27,7 @@ for dep in deps:
 
 
 store = LinkStore("Storage/Repositories/links.db")
-RepositoryLoader.load(store)
+store.cacheDir = config['linkstore']['pages_dir']
 store.refreshInterval = config['linkstore']['refresh_interval_min']
+RepositoryLoader.load(store)
 store.refresh()
