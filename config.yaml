@@ -12,10 +12,12 @@ unrealpoi:
         additional: []
     
     linkstore:
-        refresh_interval_min: 10080 # 7 days
+        #refresh_interval_min: 10080 # 7 days
+        refresh_interval_min: 0
+        pages_dir: "./Storage/Repositories/"
     
     downloads:
-        temp_dir: "./temp/"
+        temp_dir: "./Storage/Downloads/"
     
 
         
