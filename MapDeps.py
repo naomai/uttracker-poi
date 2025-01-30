@@ -13,9 +13,11 @@ from pprint import pprint
 with open('config.yaml', 'r') as file:
     config = yaml.safe_load(file)['unrealpoi']
 
+ueDownloadsPath = os.path.join(config['game']['main'], "UTTDownloads")
 
 localStore = PackageLocalStore()
 localStore.pathsFromConfig(config['game'])
+localStore.downloadsDir = ueDownloadsPath
 
 linkStore = LinkStore("Storage/Repositories/links.db")
 linkStore.cacheDir = config['linkstore']['pages_dir']
@@ -31,7 +33,7 @@ downloader.init()
 
 Unpacker.finishedDownloads = downloader.finishedQueue
 Unpacker.workingDir = config['downloads']['unpack_dir']
-Unpacker.destinationDir = os.path.join(config['game']['main'], "UTTDownloads")
+Unpacker.destinationDir = ueDownloadsPath
 os.makedirs(Unpacker.workingDir, exist_ok=True)
 os.makedirs(Unpacker.destinationDir, exist_ok=True)
 Unpacker.init()
