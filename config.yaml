@@ -18,6 +18,8 @@ unrealpoi:
     
     downloads:
         temp_dir: "./Storage/Downloads/"
+        unpack_dir: "./Storage/Unpacked/"
+
     
 
         
