@@ -67,6 +67,14 @@ class LinkStore:
                 repo.refreshEnd()
             finally:
                 self.__db.commit()
+    
+    def getPackageLinkInfo(self, package):
+        cur = self.__db.cursor()
+        res = cur.execute("SELECT `url`, `filename` FROM `links` WHERE `package`=:package",
+                                    {'package':package.casefold()}
+                                )
+        repoRow = res.fetchone()
+        return repoRow[0], repoRow[1]
 
     def __verifySignature(_, signature: str):
         if not re.match("^[a-zA-Z0-9]{1,4}$", signature):
@@ -121,7 +129,7 @@ class LinkRepository:
             VALUES(:repo, :package, :filename, :url)
             """, {
                 'repo': self.__repoId,
-                'package': packageName,
+                'package': packageName.casefold(),
                 'filename': filename,
                 'url': url   
             })
