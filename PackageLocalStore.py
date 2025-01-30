@@ -87,6 +87,7 @@ class PackageLocalStore:
         cache.extend(self.__findFilesByPattern("Music/*.umx", path))
         cache.extend(self.__findFilesByPattern("Sounds/*.uax", path))
         cache.extend(self.__findFilesByPattern("Textures/*.utx", path))
+        cache.extend(self.__findFilesByPattern("UTTDownloads/*.u*", path))
 
         return cache
 
