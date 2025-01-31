@@ -5,7 +5,7 @@ from functools import reduce
 from pprint import pprint
 import shutil
 
-class PackageLocalStore:
+class InstalledPackagesStore:
     paths={}
     downloadsDir: str
     mainDir: str
@@ -189,16 +189,18 @@ class PackageLocalStore:
         return list
 
 
-    def __parseUeCacheFile(self, cacheFilePath: str):
+    def __parseUeCacheFile(self, cacheFilePath: str) -> list:
         """
         Read UE cache.ini file into a list of
         ```
         [hash, fileName]
         ```
         """
-        with open(cacheFilePath) as f:
-            cache = [line.rstrip().split("=",1) for line in f]
-        
+        try:
+            with open(cacheFilePath) as f:
+                cache = [line.rstrip().split("=",1) for line in f]
+        except Exception:
+            return []
         return cache
     
     def __pullFromCache(self, cacheEntry):

@@ -1,12 +1,12 @@
-import UnrealEngine
-from PackageLocalStore import PackageLocalStore
-from ContentDownloader.LinkStore import LinkStore
-from ContentDownloader import RepositoryLoader
-import WebService
-from ContentDownloader import Downloader
+import unreal_engine
+from installed_packages_store import InstalledPackagesStore
+from web_repository import Manager
+from web_repository import Loader
+import web_service
+from content_downloader import downloader
 import yaml
 import glob
-import Unpacker
+from content_downloader import unpacker
 import os
 from pprint import pprint
 
@@ -15,37 +15,36 @@ with open('config.yaml', 'r') as file:
 
 ueDownloadsPath = os.path.join(config['game']['main'], "UTTDownloads")
 
-localStore = PackageLocalStore()
+localStore = InstalledPackagesStore()
 localStore.pathsFromConfig(config['game'])
 localStore.downloadsDir = ueDownloadsPath
 
-linkStore = LinkStore("Storage/Repositories/links.db")
+linkStore = Manager("Storage/Repositories/links.db")
 linkStore.cacheDir = config['linkstore']['pages_dir']
 os.makedirs(linkStore.cacheDir, exist_ok=True)
 linkStore.refreshInterval = config['linkstore']['refresh_interval_min']
-RepositoryLoader.load(linkStore)
+Loader.load(linkStore)
 linkStore.refresh()
 
-downloader = Downloader
 downloader.targetDir = config['downloads']['temp_dir']
 os.makedirs(downloader.targetDir, exist_ok=True)
 downloader.init()
 
-Unpacker.finishedDownloads = downloader.finishedQueue
-Unpacker.workingDir = config['downloads']['unpack_dir']
-Unpacker.destinationDir = ueDownloadsPath
-os.makedirs(Unpacker.workingDir, exist_ok=True)
-os.makedirs(Unpacker.destinationDir, exist_ok=True)
-Unpacker.init()
+unpacker.finishedDownloads = downloader.finishedQueue
+unpacker.workingDir = config['downloads']['unpack_dir']
+unpacker.destinationDir = ueDownloadsPath
+os.makedirs(unpacker.workingDir, exist_ok=True)
+os.makedirs(unpacker.destinationDir, exist_ok=True)
+unpacker.init()
 
-WebService.store = linkStore
-WebService.downloader = downloader
-WebService.init(addr="0.0.0.0", port=39801)
+web_service.store = linkStore
+web_service.downloader = downloader
+web_service.init(addr="0.0.0.0", port=39801)
 
 #mapFile = config['game']['main'] + r'/Maps/AS-Frigate.unr'
 #
 #with open(mapFile, "rb") as pkgFile:
-#    pkg = UnrealEngine.loadPackage(pkgFile)
+#    pkg = unreal_engine.loadPackageInfo(pkgFile)
 #
 #deps = pkg.getDependencies()
 #

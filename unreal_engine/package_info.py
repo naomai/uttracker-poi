@@ -1,5 +1,5 @@
 import struct
-from .PackageDependencies import UEPackageDependencies
+from .package_dependencies import UEPackageDependencies
 
 class UEPackageInfo:
     """

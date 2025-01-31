@@ -1,4 +1,5 @@
-from ..LinkStore import LinkRepository, LinkStore
+from ..Manager import Manager
+from ..Repository import Repository
 from pyquery import PyQuery as pq
 import urllib
 
@@ -6,9 +7,9 @@ WEBSITE_URL = "https://ut-files.com/index.php"
 CACHE_MAX_AGE = 60 * 60 * 24 * 7 # 7 days
 RATE_LIMITER = 5
 
-__repo: LinkRepository
+__repo: Repository
 
-def init(store: LinkStore):
+def init(store: Manager):
     global __repo
     __repo = store.registerRepository("utfi")
     __repo.setRefreshCallback(refreshAll)
