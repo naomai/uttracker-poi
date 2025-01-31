@@ -5,29 +5,22 @@ from urllib.parse import urlparse
 import aiohttp
 import re
 import os
-import urllib
-import time
+import orchestration
 
 targetDir = "./Storage/Downloads"
-downloadQueue = queue.Queue()
-finishedQueue = queue.Queue()
-downloadThread = None
 
 def download(url: str, fileName = None, job_data = None):
-    downloadQueue.put({
+    orchestration.queue_add("download_request", {
             'url':url, 
             'file': fileName, 
             'jobData': job_data,
         })
 
 def init():
-    downloadThread = threading.Thread(target=loop)
-    downloadThread.start()
+    pass
 
-def loop():
-    while True:
-        job = downloadQueue.get()
-        asyncio.run(fetch(job['url'], job['file'], job['jobData']))
+def process_job(job: dict):
+    asyncio.run(fetch(job['url'], job['file'], job['jobData']))
 
 
 async def fetch(url, fileName = None, job_data = None):
@@ -53,7 +46,7 @@ async def fetch(url, fileName = None, job_data = None):
                         if not data:
                             break
                         pkg.write(data)
-                finishedQueue.put({
+                orchestration.queue_add("download_complete", {
                         'url': url,
                         'file': fileName,
                         'filePath': targetFile,

@@ -7,6 +7,7 @@ from content_downloader import downloader
 import yaml
 import glob
 from content_downloader import unpacker
+import orchestration
 import os
 from pprint import pprint
 
@@ -28,14 +29,13 @@ linkStore.refresh()
 
 downloader.targetDir = config['downloads']['temp_dir']
 os.makedirs(downloader.targetDir, exist_ok=True)
-downloader.init()
 
-unpacker.finishedDownloads = downloader.finishedQueue
 unpacker.workingDir = config['downloads']['unpack_dir']
 unpacker.destinationDir = ueDownloadsPath
 os.makedirs(unpacker.workingDir, exist_ok=True)
 os.makedirs(unpacker.destinationDir, exist_ok=True)
-unpacker.init()
+
+orchestration.init()
 
 web_service.store = linkStore
 web_service.downloader = downloader

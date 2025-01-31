@@ -7,27 +7,25 @@ import threading
 
 store = None
 downloader = None
-ENDPOINT_PACKAGE_DOWNLOAD = "/download"
+ENDPOINT_MAP_DOWNLOAD = "/download"
 serverThread = None
 httpServer = None
 
-def handlePackageDownload(postData):
+def handleMapDownload(postData):
     try:
         request = json.loads(postData)
     except json.decoder.JSONDecodeError:
         raise ValueError("Invalid request data")
         
-    if 'package' in request:
-        package = request['package']
-        (url, fileName) = store.getPackageLinkInfo(request['package'])
+    if 'map' in request:
+        package = request['map']
+        (url, fileName) = store.getPackageLinkInfo(request['map'])
 
         if downloader.isDownloaded(fileName):
             return {'status': 'Already downloaded'}
         
-        downloader.download(url, fileName)
+        downloader.download(url, fileName, {'workflow': 'map_download'})
         return {'status': "Download started..."}
-
-
 
 class RequestHandler(BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server_class):
@@ -36,7 +34,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         response = {"error": "This GET request is not supported by the service"}
-        response = handlePackageDownload("{\"package\":\"MH-AfterDark\"}")
+        response = handleMapDownload("{\"map\":\"MH-AfterDark\"}")
         self.send_response(405)
         self.send_header("Content-type", "application/json")
         self.send_header("Content-length", str(len(json.dumps(response))))
@@ -51,8 +49,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         response = {'error': 'Requested resource was not found'}
         status = 404
         try:
-            if self.path == ENDPOINT_PACKAGE_DOWNLOAD:
-                response = handlePackageDownload(postData)
+            if self.path == ENDPOINT_MAP_DOWNLOAD:
+                response = handleMapDownload(postData)
                 status = 200
         except ValueError as e:
             response = {'error': str(e)}

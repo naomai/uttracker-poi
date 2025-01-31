@@ -6,23 +6,18 @@ import time
 import shutil
 from glob import glob
 from os import path
+import orchestration
 
-finishedDownloads: Queue = None
-finishedUnpacks = Queue()
-thread = None
 workingDir = None
 destinationDir = None
 
 def init():
-    thread = threading.Thread(target=loop)
-    thread.start()
+    pass
 
-def loop():
-    while True:
-        job = finishedDownloads.get()
-        dest_dir = unpack(job['filePath'])
-        job['unpackDir'] = dest_dir
-        finishedUnpacks.put(job)
+def process_job(job: dict):
+    dest_dir = unpack(job['filePath'])
+    job['unpackDir'] = dest_dir
+    orchestration.queue_add("unpack_complete", job)
 
 def unpack(file: str):
     wd = path.join(workingDir, str(time.time()))
