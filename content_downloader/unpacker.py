@@ -8,6 +8,7 @@ from glob import glob
 from os import path
 
 finishedDownloads: Queue = None
+finishedUnpacks = Queue()
 thread = None
 workingDir = None
 destinationDir = None
@@ -18,8 +19,10 @@ def init():
 
 def loop():
     while True:
-        downloadInfo = finishedDownloads.get()
-        unpack(downloadInfo['filePath'])
+        job = finishedDownloads.get()
+        dest_dir = unpack(job['filePath'])
+        job['unpackDir'] = dest_dir
+        finishedUnpacks.put(job)
 
 def unpack(file: str):
     wd = path.join(workingDir, str(time.time()))
@@ -29,6 +32,7 @@ def unpack(file: str):
         copyFlat(wd, destinationDir)
     finally:
         shutil.rmtree(wd)
+    return destinationDir
     
 def copyFlat(src: str, dest: str):
     """
