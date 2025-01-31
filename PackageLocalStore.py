@@ -20,6 +20,10 @@ class PackageLocalStore:
         Args:
             config: dictionary with `main` key containing primary path,
             and optionally `additional` key with list of other scan locations 
+
+        Raises:
+            OSError: If one of paths does not exist, or is invalid 
+            UE game location
         """
 
         self.mainDir = realpath(config['main'])
@@ -87,7 +91,24 @@ class PackageLocalStore:
 
     def __scanUeInstalledPackages(self, path: str):
         """
-        Scan UE instance directory for common packages
+        Reload this object's list of packages for UE instance directory
+
+        Args:
+            path: location of UE game instance - directory containing 
+            subfolders `System`, `Textures`, etc.
+
+        Raises:
+            OSError: when directory is not a valid UE game instance
+        """
+        self.__validateUeInstallation(path)
+        self.paths[path] = {
+            'packages': self.__scanUeInstalledPackages(path),
+            'cache': self.__scanUeCache(path),
+        }
+
+    def __scanUeInstalledPackages(self, path: str):
+        """
+        Scan UE instance directory for installed packages
 
         Args:
             path: location of UE game instance - directory containing 
@@ -105,6 +126,7 @@ class PackageLocalStore:
         cache.extend(self.__findFilesByPattern("Music/*.umx", path))
         cache.extend(self.__findFilesByPattern("Sounds/*.uax", path))
         cache.extend(self.__findFilesByPattern("Textures/*.utx", path))
+        cache.extend(self.__findFilesByPattern("UTTDownloads/*.u*", path))
         cache.extend(self.__findFilesByPattern("UTTDownloads/*.u*", path))
 
         return cache
@@ -168,12 +190,29 @@ class PackageLocalStore:
 
 
     def __parseUeCacheFile(self, cacheFilePath: str):
+        """
+        Read UE cache.ini file into a list of
+        ```
+        [hash, fileName]
+        ```
+        """
         with open(cacheFilePath) as f:
             cache = [line.rstrip().split("=",1) for line in f]
         
         return cache
     
-    def pullFromCache(self, cacheEntry):
+    def __pullFromCache(self, cacheEntry):
+        """
+        Copy package from cache into `UTTDownloads` directory
+
+        Args:
+            cacheEntry: Dict describing cached file:
+            ```
+            {'name': "CTF-LiandriDocks.unr", 'path': "/mnt/usb0/Unreal/Cache/9BFAA89C45FB592A549F63B481225292.uxx"}
+            ```
+        Returns:
+            Dict containing new `path` of copied file
+        """
         if os.path.exists(cacheEntry['path']):
             dest = os.path.join(self.downloadsDir, cacheEntry['name'])
             shutil.copy2(cacheEntry['path'], dest)
@@ -185,6 +224,12 @@ class PackageLocalStore:
         return None
     
     def __validateUeInstallation(self, dir: str):
+        """
+        Check if directory has valid structure of Unreal Engine game
+
+        Raises:
+            OSError: when directory is not a valid UE game instance
+        """
         if not os.path.exists(dir + "/Maps") \
                 or not os.path.exists(dir + "/Textures") \
                 or not os.path.exists(dir + "/Music") \
