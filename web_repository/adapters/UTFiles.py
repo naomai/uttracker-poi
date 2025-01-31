@@ -1,5 +1,5 @@
-from ..Manager import Manager
-from ..Repository import Repository
+from ..manager import Manager
+from ..repository import Repository
 from pyquery import PyQuery as pq
 import urllib
 
