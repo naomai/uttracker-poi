@@ -4,6 +4,7 @@ from web_repository import Manager
 from web_repository import Loader
 import web_service
 from content_downloader import downloader
+from map_converter import dependency_resolver
 import yaml
 import glob
 from content_downloader import unpacker
@@ -34,6 +35,11 @@ unpacker.workingDir = config['downloads']['unpack_dir']
 unpacker.destinationDir = ueDownloadsPath
 os.makedirs(unpacker.workingDir, exist_ok=True)
 os.makedirs(unpacker.destinationDir, exist_ok=True)
+
+dependency_resolver.installed_store = localStore
+dependency_resolver.web_repo = linkStore
+dependency_resolver.destination_dir = config['content_dir']
+os.makedirs(dependency_resolver.destination_dir, exist_ok=True)
 
 orchestration.init()
 

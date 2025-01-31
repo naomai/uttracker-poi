@@ -19,13 +19,18 @@ def handleMapDownload(postData):
         
     if 'map' in request:
         package = request['map']
+        response = {'status': "Download started..."}
         (url, fileName) = store.getPackageLinkInfo(request['map'])
 
         if downloader.isDownloaded(fileName):
-            return {'status': 'Already downloaded'}
+            response = {'status': 'Already downloaded'}
+            # call download() anyway, as we'll fall through to the next task
         
-        downloader.download(url, fileName, {'workflow': 'map_download'})
-        return {'status': "Download started..."}
+        downloader.download(url, fileName, {
+            'workflow': 'map_download',
+            'mapName': package
+            })
+        return response
 
 class RequestHandler(BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server_class):

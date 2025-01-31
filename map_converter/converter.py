@@ -1,6 +1,26 @@
-from ..unreal_engine import ucc
+from unreal_engine import ucc
 from os import path
 import re
+from content_downloader import downloader
+import shutil
+
+destination_dir = "./Storage/MapContent"
+
+def process_job(job: dict):
+    map_name = job['jobData']['mapName']
+    map_file = path.join(job['unpackDir'], map_name + ".unr")
+
+    if not path.exists(map_file):
+        return
+
+    try:
+        map_dir = path.join(destination_dir, map_name)
+        polys_tmp = extract_polys(map_file, map_dir)
+
+    #except UccPackageMissingException as e:
+    finally:
+        pass   
+    
 
 def extract_polys(map_file: str, target_dir: str):
     out = ucc.exec(
@@ -17,7 +37,7 @@ def extract_polys(map_file: str, target_dir: str):
     if not path.exists(output_file):
         raise ucc.UccExportException(f"UCC export failed with message '{out}'", map_file, out)
     
-    return out
+    return output_file
 
 class UccPackageMissingException(ucc.UccExportException):
     package: str

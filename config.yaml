@@ -3,8 +3,9 @@ unrealpoi:
         # Main Unreal Engine instance
         #
         # Serves as native Unreal Engine component of UnrealPOI:
-        #   it provides UCC tool, and will store all downloads in its directories
+        #   it provides UCC tool, and will store all downloads
         # It is recommended to be a standalone instance - only for this single purpose
+        # `UTTDownloads` directory will be created for downloads
         main: "C:\\Users\\tmdvt\\Desktop\\games\\UnrealTournament\\"
 
         # Additional read-only instances
@@ -19,6 +20,8 @@ unrealpoi:
     downloads:
         temp_dir: "./Storage/Downloads/"
         unpack_dir: "./Storage/Unpacked/"
+        
+    content_dir: "./Storage/MapContent/"
 
     
 

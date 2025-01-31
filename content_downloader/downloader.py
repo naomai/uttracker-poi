@@ -10,6 +10,11 @@ import orchestration
 targetDir = "./Storage/Downloads"
 
 def download(url: str, fileName = None, job_data = None):
+    if isDownloaded(fileName):
+        # skip downloading and fall through, maybe add skipped flag?
+        notify_complete(url, fileName, getDownloadedPath(fileName), job_data)
+        return
+
     orchestration.queue_add("download_request", {
             'url':url, 
             'file': fileName, 
@@ -46,12 +51,7 @@ async def fetch(url, fileName = None, job_data = None):
                         if not data:
                             break
                         pkg.write(data)
-                orchestration.queue_add("download_complete", {
-                        'url': url,
-                        'file': fileName,
-                        'filePath': targetFile,
-                        'jobData': job_data,
-                    })
+                notify_complete(url, fileName, targetFile, job_data)
             except Exception:
                 pass
 
@@ -61,3 +61,11 @@ def isDownloaded(fileName):
 
 def getDownloadedPath(fileName):
     return os.path.join(targetDir, fileName)
+
+def notify_complete(url, file_name, file_path, job_data):
+    orchestration.queue_add("download_complete", {
+                            'url': url,
+                            'file': file_name,
+                            'filePath': file_path,
+                            'jobData': job_data,
+                        })

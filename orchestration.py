@@ -3,6 +3,7 @@ import threading
 import queue
 
 from content_downloader import downloader, unpacker
+from map_converter import converter, dependency_resolver
 
 task_queue = queue.Queue()
 my_thread = None
@@ -27,8 +28,9 @@ def dispatch_job(job: tuple):
     elif tag == "download_complete":
         unpacker.process_job(data)
     elif tag == "unpack_complete":
-        if data['workflow'] == "map_download":
-            pass # conversion
-        elif data['workflow'] == "missing_dependency":
-            pass # resume data['super_job']
-
+        if data['jobData']['workflow'] == "map_download":
+            dependency_resolver.process_job(data)
+        elif data['jobData']['workflow'] == "missing_dependency":
+            dependency_resolver.process_dependency_download(data)
+    elif tag == "dependencies_complete":
+        converter.process_job(data)

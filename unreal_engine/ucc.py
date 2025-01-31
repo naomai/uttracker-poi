@@ -2,7 +2,7 @@ import sys
 import subprocess
 from os import path
 
-__platform = sys.platform()
+__platform = sys.platform
 if __platform == "linux":
     __ucc_exec_filename = "ucc-bin"
 elif __platform == "win32":

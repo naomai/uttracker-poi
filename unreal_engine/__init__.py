@@ -1,1 +1,1 @@
-from .package_info import load as loadPackageInfo
+from .package_info import load as loadPackageInfo, UEPackageInfo 
