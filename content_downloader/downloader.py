@@ -10,7 +10,7 @@ import orchestration
 targetDir = "./Storage/Downloads"
 
 def download(url: str, fileName = None, job_data = None):
-    if isDownloaded(fileName):
+    if isDownloaded(fileName) or not fileName:
         # skip downloading and fall through, maybe add skipped flag?
         notify_complete(url, fileName, getDownloadedPath(fileName), job_data)
         return
@@ -26,6 +26,7 @@ def init():
 
 def process_job(job: dict):
     asyncio.run(fetch(job['url'], job['file'], job['jobData']))
+
 
 
 async def fetch(url, fileName = None, job_data = None):
@@ -56,6 +57,8 @@ async def fetch(url, fileName = None, job_data = None):
                 pass
 
 def isDownloaded(fileName):
+    if not fileName:
+        return False
     targetFile = os.path.join(targetDir, fileName)
     return os.path.exists(targetFile)
 
@@ -69,3 +72,4 @@ def notify_complete(url, file_name, file_path, job_data):
                             'filePath': file_path,
                             'jobData': job_data,
                         })
+    

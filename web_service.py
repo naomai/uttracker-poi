@@ -1,12 +1,9 @@
-import argparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import threading
-#from .ContentDownloader.LinkStore import LinkStore
-#from .ContentDownloader import Downloader
+from content_downloader import link_lookup
 
 store = None
-downloader = None
 ENDPOINT_MAP_DOWNLOAD = "/download"
 serverThread = None
 httpServer = None
@@ -19,19 +16,13 @@ def handleMapDownload(postData):
         
     if 'map' in request:
         package = request['map']
-        response = {'status': "Download started..."}
-        (url, fileName) = store.getPackageLinkInfo(request['map'])
+        response = {'status': "Download request successful"}
 
-        if downloader.isDownloaded(fileName):
-            response = {'status': 'Already downloaded'}
-            # call download() anyway, as we'll fall through to the next task
-        
-        downloader.download(url, fileName, {
-            'workflow': 'map_download',
-            'mapName': package
-            })
+        # delegate link lookup to main thread
+        link_lookup.request(package)
+
         return response
-
+    
 class RequestHandler(BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server_class):
         self.server_class = server_class
@@ -80,9 +71,9 @@ def init(addr, port):
     serverAddress = (addr, port)
     httpServer = HTTPServer(serverAddress, RequestHandler)
 
-    #serverThread = threading.Thread(target=serve)
-    #serverThread.start()
-    serve()
+    serverThread = threading.Thread(target=serve)
+    serverThread.start()
+    #serve()
 
 
 def serve():

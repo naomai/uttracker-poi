@@ -38,13 +38,17 @@ def resolve_dependencies(map_file: str, job: dict):
         if not "depsProcessed" in job["jobData"]:
             job["jobData"]["depsProcessed"] = []
 
-        if dependency['name'] in job["jobData"]["depsProcessed"]:
+        if dependency['filename'] in job["jobData"]["depsProcessed"]:
             # skip downloading current dependency, since we already tried
             # it might magically appear with next ones 
             continue
 
         (url, fileName) = web_repo.getPackageLinkInfo(dependency['name'])
-        
+        if not url:
+            notify_skip_dependency(dependency['filename'], job)
+            return False
+
+
         downloader.download(url, fileName, {
                 'workflow': 'missing_dependency',
                 'missingFile': fileName,
@@ -53,12 +57,14 @@ def resolve_dependencies(map_file: str, job: dict):
         # single download scheduled, end task
         return False
     
-    # exhausted all options, abort (TODO)
+    # exhausted all options, abort
+    notify_failure(job)
+    return False
 
-def process_dependency_download(job: dict):
+def process_dependency_after_download(job: dict):
     job_super = job['jobData']['superJob']
     job_super["jobData"]["depsProcessed"].append(job['jobData']['missingFile'])
-    orchestration.queue_add("unpack_complete", job_super)
+    orchestration.queue_add("dependencies_retry", job_super)
     
     
     
@@ -69,7 +75,14 @@ def get_missing_dependencies(package: UEPackageInfo):
     for dep in deps:
         file = dep["filename"]
         storeLoc = installed_store.find(file)
-        if len(storeLoc) > 0:
+        if len(storeLoc) == 0:
             missing.append(dep)
 
     return missing
+
+def notify_skip_dependency(dependency_filename: str, job: dict):
+    job["jobData"]["depsProcessed"].append(dependency_filename)
+    orchestration.queue_add("dependencies_retry", job)
+
+def notify_failure(job: dict):
+    orchestration.queue_add("dependencies_failure", job)
