@@ -14,6 +14,8 @@ class Manager:
     refreshInterval: int = 10080
 
     def __init__(self, dbFile: str):
+        os.makedirs(self.cacheDir, exist_ok=True)
+        os.makedirs(os.path.dirname(dbFile), exist_ok=True)
         self.__db = sqlite3.connect(dbFile)
         self.__ensureDbStructure()
 
@@ -73,6 +75,10 @@ class Manager:
                                     {'package':package.casefold()}
                                 )
         repoRow = res.fetchone()
+
+        if not repoRow:
+            return None, None
+        
         return repoRow[0], repoRow[1]
 
     def __verifySignature(_, signature: str):
