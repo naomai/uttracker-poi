@@ -75,7 +75,7 @@ class InstalledPackagesStore:
             reduce(_appendMatching, path['cache'], cache)
 
         if len(files)==0 and len(cache) > 0:
-            pulled = self.pullFromCache(cache[0])
+            pulled = self.__pullFromCache(cache[0])
             if pulled:
                 files.append(pulled)
 
@@ -185,7 +185,6 @@ class InstalledPackagesStore:
                     'path': entryPath,
                 }
                 list.append(cacheEntry)
-        pprint(list)
         return list
 
 
