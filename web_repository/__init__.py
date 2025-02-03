@@ -1,3 +1,3 @@
 from .repository import Repository
-from .manager import Manager
-from . import loader as Loader
+from .manager import RepositoryManager
+from . import loader as RepositoryLoader

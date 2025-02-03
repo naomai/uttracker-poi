@@ -1,7 +1,7 @@
-from .manager import Manager
+from .manager import RepositoryManager
 
 from .adapters import UTFiles
 
-def load(store: Manager):
+def load(store: RepositoryManager):
     UTFiles.init(store)
 

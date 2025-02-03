@@ -4,7 +4,7 @@ import sqlite3
 from pprint import pprint
 from .repository import Repository
 
-class Manager:
+class RepositoryManager:
     """
     Manages repositories of download links
     """

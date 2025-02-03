@@ -7,13 +7,13 @@ import shutil
 
 class InstalledPackagesStore:
     paths={}
-    downloadsDir: str
-    mainDir: str
+    downloads_dir: str
+    main_dir: str
 
     def __init__(self):
         pass
         
-    def pathsFromConfig(self, config: dict):
+    def paths_from_config(self, config: dict):
         """
         Imports scan location from config dict to the store
 
@@ -26,15 +26,15 @@ class InstalledPackagesStore:
             UE game location
         """
 
-        self.mainDir = realpath(config['main'])
-        self.addScanPath(self.mainDir)
+        self.main_dir = realpath(config['main'])
+        self.add_scan_path(self.main_dir)
 
         if not "additional" in config:
             return
         for path in config['additional']:
-            self.addScanPath(realpath(path))
+            self.add_scan_path(realpath(path))
     
-    def addScanPath(self, path: str):
+    def add_scan_path(self, path: str):
         """
         Adds package scan location to the store
 
@@ -48,7 +48,7 @@ class InstalledPackagesStore:
         pathReal = os.path.realpath(path)
 
         if not pathReal in self.paths:
-            self.__updateUeDirectory(pathReal)
+            self.__update_ue_directory(pathReal)
 
     def find(self, file: str):
         """
@@ -63,7 +63,7 @@ class InstalledPackagesStore:
             {'name': "CTF-Face.unr", 'path': "/mnt/usb0/Unreal/Maps/CTF-Face.unr"}
         """
 
-        def _appendMatching(acc: list, f: dict):
+        def _append_matching(acc: list, f: dict):
             if f['name'].casefold()  == file.casefold():
                 acc.append(f)
             return acc
@@ -71,25 +71,25 @@ class InstalledPackagesStore:
         files = []
         cache = []
         for path in self.paths.values():
-            reduce(_appendMatching, path['packages'], files)
-            reduce(_appendMatching, path['cache'], cache)
+            reduce(_append_matching, path['packages'], files)
+            reduce(_append_matching, path['cache'], cache)
 
         if len(files)==0 and len(cache) > 0:
-            pulled = self.__pullFromCache(cache[0])
+            pulled = self.__pull_from_cache(cache[0])
             if pulled:
                 files.append(pulled)
 
         return files
     
-    def __updateUeDirectory(self, path: str):
-        self.__validateUeInstallation(path)
+    def __update_ue_directory(self, path: str):
+        self.__validate_ue_installation(path)
 
         self.paths[path] = {
-            'packages': self.__scanUeInstalledPackages(path),
-            'cache': self.__scanUeCache(path),
+            'packages': self.__scan_ue_installed_packages(path),
+            'cache': self.__scan_ue_cache(path),
         }
 
-    def __scanUeInstalledPackages(self, path: str):
+    def __scan_ue_installed_packages(self, path: str):
         """
         Reload this object's list of packages for UE instance directory
 
@@ -100,13 +100,13 @@ class InstalledPackagesStore:
         Raises:
             OSError: when directory is not a valid UE game instance
         """
-        self.__validateUeInstallation(path)
+        self.__validate_ue_installation(path)
         self.paths[path] = {
-            'packages': self.__scanUeInstalledPackages(path),
-            'cache': self.__scanUeCache(path),
+            'packages': self.__scan_ue_installed_packages(path),
+            'cache': self.__scan_ue_cache(path),
         }
 
-    def __scanUeInstalledPackages(self, path: str):
+    def __scan_ue_installed_packages(self, path: str):
         """
         Scan UE instance directory for installed packages
 
@@ -121,17 +121,17 @@ class InstalledPackagesStore:
             ```
         """
         cache = []
-        cache.extend(self.__findFilesByPattern("Maps/*.unr", path))
-        cache.extend(self.__findFilesByPattern("System/*.u", path))
-        cache.extend(self.__findFilesByPattern("Music/*.umx", path))
-        cache.extend(self.__findFilesByPattern("Sounds/*.uax", path))
-        cache.extend(self.__findFilesByPattern("Textures/*.utx", path))
-        cache.extend(self.__findFilesByPattern("UTTDownloads/*.u*", path))
-        cache.extend(self.__findFilesByPattern("UTTDownloads/*.u*", path))
+        cache.extend(self.__find_files_by_pattern("Maps/*.unr", path))
+        cache.extend(self.__find_files_by_pattern("System/*.u", path))
+        cache.extend(self.__find_files_by_pattern("Music/*.umx", path))
+        cache.extend(self.__find_files_by_pattern("Sounds/*.uax", path))
+        cache.extend(self.__find_files_by_pattern("Textures/*.utx", path))
+        cache.extend(self.__find_files_by_pattern("UTTDownloads/*.u*", path))
+        cache.extend(self.__find_files_by_pattern("UTTDownloads/*.u*", path))
 
         return cache
 
-    def __findFilesByPattern(_, pattern: str, rootDir: str):
+    def __find_files_by_pattern(_, pattern: str, root_dir: str):
         """
         Find files matching provided pattern 
 
@@ -146,17 +146,17 @@ class InstalledPackagesStore:
             ```
         """
         files = []
-        globList = glob.glob(pathname=pattern, root_dir=rootDir)
+        glob_list = glob.glob(pathname=pattern, root_dir=root_dir)
         files = list(map(
             lambda f: {
                 'name': os.path.basename(f),
-                'path': os.path.join(rootDir, f),
+                'path': os.path.join(root_dir, f),
             },
-            globList
+            glob_list
         ))
         return files
 
-    def __scanUeCache(self, path: str):
+    def __scan_ue_cache(self, path: str):
         """
         Scan cache of UE instance
 
@@ -170,25 +170,25 @@ class InstalledPackagesStore:
             {'name': "CTF-LiandriDocks.unr", 'path': "/mnt/usb0/Unreal/Cache/9BFAA89C45FB592A549F63B481225292.uxx"}
             ```
         """
-        cacheDir = os.path.join(path, "Cache")
-        cacheFile = os.path.join(cacheDir, "cache.ini")
-        cache = self.__parseUeCacheFile(cacheFile)
+        cache_dir = os.path.join(path, "Cache")
+        cache_file = os.path.join(cache_dir, "cache.ini")
+        cache = self.__parse_ue_cache_file(cache_file)
 
         list = []
         
-        for cacheRawEntry in cache:
-            entryPath = os.path.join(cacheDir, cacheRawEntry[0] + ".uxx")
+        for cache_raw_entry in cache:
+            entry_path = os.path.join(cache_dir, cache_raw_entry[0] + ".uxx")
 
-            if os.path.exists(entryPath):
-                cacheEntry = {
-                    'name': cacheRawEntry[1],
-                    'path': entryPath,
+            if os.path.exists(entry_path):
+                cache_entry = {
+                    'name': cache_raw_entry[1],
+                    'path': entry_path,
                 }
-                list.append(cacheEntry)
+                list.append(cache_entry)
         return list
 
 
-    def __parseUeCacheFile(self, cacheFilePath: str) -> list:
+    def __parse_ue_cache_file(self, cacheFilePath: str) -> list:
         """
         Read UE cache.ini file into a list of
         ```
@@ -202,7 +202,7 @@ class InstalledPackagesStore:
             return []
         return cache
     
-    def __pullFromCache(self, cacheEntry):
+    def __pull_from_cache(self, cacheEntry):
         """
         Copy package from cache into `UTTDownloads` directory
 
@@ -215,16 +215,16 @@ class InstalledPackagesStore:
             Dict containing new `path` of copied file
         """
         if os.path.exists(cacheEntry['path']):
-            dest = os.path.join(self.downloadsDir, cacheEntry['name'])
+            dest = os.path.join(self.downloads_dir, cacheEntry['name'])
             shutil.copy2(cacheEntry['path'], dest)
-            self.__updateUeDirectory(self.mainDir)
+            self.__update_ue_directory(self.main_dir)
             return {
                 'name': cacheEntry['name'],
                 'path': dest,
             }
         return None
     
-    def __validateUeInstallation(self, dir: str):
+    def __validate_ue_installation(self, dir: str):
         """
         Check if directory has valid structure of Unreal Engine game
 

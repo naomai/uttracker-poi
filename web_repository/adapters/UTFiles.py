@@ -1,4 +1,4 @@
-from ..manager import Manager
+from ..manager import RepositoryManager
 from ..repository import Repository
 from pyquery import PyQuery as pq
 import urllib
@@ -9,7 +9,7 @@ RATE_LIMITER = 5
 
 __repo: Repository
 
-def init(store: Manager):
+def init(store: RepositoryManager):
     global __repo
     __repo = store.registerRepository("utfi")
     __repo.setRefreshCallback(refreshAll)
