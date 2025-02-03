@@ -21,7 +21,7 @@ def process_job(job: dict):
     
     resolved = resolve_dependencies(map_file, job)
     if resolved:
-        orchestration.queue_add("depencencies_complete", job)
+        orchestration.queue_add("dependencies_complete", job)
 
     
 
@@ -36,6 +36,7 @@ def resolve_dependencies(map_file: str, job: dict):
         return True
 
     for dependency in deps:
+        print(f"Looking for {dependency['name']} (of {len(deps)})...")
         if not "depsProcessed" in job["jobData"]:
             job["jobData"]["depsProcessed"] = []
 

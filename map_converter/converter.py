@@ -17,6 +17,8 @@ def process_job(job: dict):
         map_dir = path.join(destination_dir, map_name)
         polys_tmp = extract_polys(map_file, map_dir)
 
+        # notify T3D parser
+
     #except UccPackageMissingException as e:
     finally:
         pass   
@@ -37,7 +39,7 @@ def extract_polys(map_file: str, target_dir: str):
     if not path.exists(output_file):
         raise ucc.UccExportException(f"UCC export failed with message '{out}'", map_file, out)
     
-    return output_file
+    return path.realpath(output_file)
 
 class UccPackageMissingException(ucc.UccExportException):
     package: str

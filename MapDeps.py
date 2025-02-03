@@ -6,6 +6,7 @@ from installed_packages_store import InstalledPackagesStore
 from web_repository import RepositoryManager, RepositoryLoader
 from content_downloader import downloader, unpacker, link_lookup
 from map_converter import dependency_resolver
+from unreal_engine import ucc
 import web_service
 
 # CONFIG
@@ -13,6 +14,7 @@ with open('config.yaml', 'r') as file:
     config = yaml.safe_load(file)['unrealpoi']
 
 ue_downloads_path = os.path.join(config['game']['main'], "UTTDownloads")
+ucc.game_path = config['game']['main']
 
 # REPOSITORIES
 local_packages = InstalledPackagesStore()
