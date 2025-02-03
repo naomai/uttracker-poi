@@ -31,6 +31,7 @@ links_repo.refresh()
 # WORKER MODULES
 link_lookup.repository = links_repo
 link_lookup.downloader = downloader
+link_lookup.installed_packages = local_packages
 
 downloader.target_dir = config['downloads']['temp_dir']
 os.makedirs(downloader.target_dir, exist_ok=True)

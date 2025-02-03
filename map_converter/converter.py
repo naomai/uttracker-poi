@@ -1,6 +1,7 @@
 from unreal_engine import ucc, t3d
 from os import path
 import re
+import json
 from content_downloader import downloader
 import shutil
 
@@ -15,23 +16,28 @@ def process_job(job: dict):
 
     try:
         map_dir = path.join(destination_dir, map_name)
-        polys_tmp = extract_polys(map_file, map_dir)
+        level_tmp_path = extract_level(map_file, map_dir)
 
-        with open(polys_tmp) as f:
-            t3d.parse_t3d(f.read())
+        with open(level_tmp_path) as f:
+            map = t3d.parse_t3d(f.read())
 
-    #except UccPackageMissingException as e:
+        level_converted_path = path.join(map_dir, "level.json") 
+        export_level_json(level_converted_path, map)
+        
+
+    except UccPackageMissingException as e:
+        pass
     finally:
         pass   
     
 
-def extract_polys(map_file: str, target_dir: str):
+def extract_level(map_file: str, target_dir: str):
     out = ucc.exec(
         "BatchExport", path.realpath(map_file), 
         "Level", "t3d", 
         path.realpath(target_dir)
     )
-    err_match = re.search("Can't find file for package '(.*)'", out)
+    err_match = re.search("Can't find file for package (.*)\.\.", out)
     if err_match != None:
         missing_package = err_match.group(1)
         raise UccPackageMissingException(map_file, missing_package)
@@ -42,9 +48,14 @@ def extract_polys(map_file: str, target_dir: str):
     
     return path.realpath(output_file)
 
+def export_level_json(target_path: str, map: list):
+    with open(target_path, "w") as f:
+        json.dump(obj=map, fp=f)
+
+
 class UccPackageMissingException(ucc.UccExportException):
     package: str
 
     def __init__(self, map_file: str, package: str):
-        ucc.UccExportException.__init(f"Missing package '{package}'", map_file)
+        ucc.UccExportException.__init__(self, f"Missing package '{package}'", map_file)
         self.package = package

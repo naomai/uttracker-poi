@@ -50,7 +50,7 @@ class InstalledPackagesStore:
         if not pathReal in self.paths:
             self.__update_ue_directory(pathReal)
 
-    def find(self, file: str):
+    def find(self, file: str) -> list[str]:
         """
         Searches local store for file. 
         If the file is present in cache, silently pull it

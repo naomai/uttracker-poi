@@ -36,7 +36,7 @@ def resolve_dependencies(map_file: str, job: dict):
         return True
 
     for dependency in deps:
-        print(f"Looking for {dependency['name']} (of {len(deps)})...")
+        print(f"Looking for {dependency['name']} (of {len(deps)})... guess: {dependency['filename']}")
         if not "depsProcessed" in job["jobData"]:
             job["jobData"]["depsProcessed"] = []
 
@@ -75,10 +75,19 @@ def get_missing_dependencies(package: UEPackageInfo):
     deps = package.getDependencies()
 
     for dep in deps:
+        # specialized extension (.utx, .umx, etc)
         file = dep["filename"]
         storeLoc = installed_store.find(file)
-        if len(storeLoc) == 0:
-            missing.append(dep)
+        if len(storeLoc) != 0:
+            continue
+
+        # generic .u
+        file = dep["name"] + ".u"
+        storeLoc = installed_store.find(file)
+        if len(storeLoc) != 0:
+            continue
+
+        missing.append(dep)
 
     return missing
 

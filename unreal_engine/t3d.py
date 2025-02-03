@@ -1,19 +1,51 @@
 import re
 
 def parse_t3d(contents: bytes):
-    actors = []
+    models = parse_brushes(contents)
+    actors = parse_actors(contents)
+    assign_actors_brush_models(actors, models)
 
-    actor_regex = re.compile(r"^Begin Actor Class=(.+?) Name=(.+?)\r?\n(.*?)End Actor", re.MULTILINE | re.DOTALL)
+    return actors
+
+def parse_brushes(contents: bytes) -> dict[str, list]:
+    """
+    Parse all brushes in T3D file
+
+    Args:
+        contents: bytes of T3D file
+
+    Returns:
+        dict[str, list]: dictionary of [model_name, list_of_polygons]
+    """
+    brushes = {}
+    brush_regex = re.compile(r"^\s*Begin Brush Name=(.+?)\r?\n(.*?)End Brush$", re.MULTILINE | re.DOTALL)
+    for match in brush_regex.finditer(contents):
+        brush_name, brush_content = match.groups()
+        brush_polys = parse_polylist(brush_content)
+        brushes[brush_name] = brush_polys
+    return brushes
+
+def parse_actors(contents: bytes):
+    actors = []
+    actor_regex = re.compile(r"^\s*Begin Actor Class=(.+?) Name=(.+?)\r?\n(.*?)End Actor", re.MULTILINE | re.DOTALL)
     for match in actor_regex.finditer(contents):
         actor_class, actor_name, actor_content = match.groups()
         actor = parse_actor_props(actor_content)
 
         actor['Class'] = actor_class
         actor['Name'] = actor_name
+        actors.append(actor)
+    return actors
 
-        brush = parse_actor_brush(actor_content)
-        actor['Brush'] = brush
-        # TODO brush reference (t3dparserVersionWhatever.php:82)
+def assign_actors_brush_models(actors: list, models: dict):
+    for actor in actors:
+        if not 'Brush' in actor or not 'export' in actor['Brush']:
+            continue
+
+        brush_name = actor['Brush']['export']
+
+        if brush_name in models:
+            actor['PolyList'] = models[brush_name]
 
 
 def parse_actor_props(actor_content: str):
@@ -21,21 +53,12 @@ def parse_actor_props(actor_content: str):
     props_regex = re.compile(r"^\s*([a-zA-Z0-9\(\)]+)=(.*)$", re.MULTILINE)
     for match in props_regex.finditer(actor_content):
         prop_name, prop_value = match.groups()
-        props[prop_name] = prop_value
+
+        prop_value_decoded = unserialize(prop_value)
+        props[prop_name] = prop_value_decoded
 
         # TODO unserialize (t3dparserVersionWhatever.php:56)
     return props
-
-def parse_actor_brush(actor_content: str):
-    brush_declaration_regex = re.compile(r"^\s*Begin Brush Name=(.+)$", re.MULTILINE)
-    if not brush_declaration_regex.search(actor_content):
-        # brush actor has no model definition (little thing done 
-        # by some mappers to save few bytes in their map files)
-        return None
-    
-    return parse_polylist(actor_content)
-    
-    
 
 
 def parse_polylist(brush_content: str):
@@ -85,3 +108,87 @@ def parse_pan(text: str):
         "U": match[1],
         "V": match[2],
     }
+
+def unserialize(text: str):
+    val = unserialize_float(text)
+    if val:
+        return val
+    
+    val = unserialize_int(text)
+    if val:
+        return val
+    
+    val = unserialize_reference(text)
+    if val:
+        return val
+    
+    val = unserialize_array(text)
+    if val:
+        return val
+    
+    val = unserialize_string(text)
+    if val:
+        return val
+    
+    return text
+    """
+    Profiler hits (two files):
+        'float' 7771, 3924
+        'int'   7679, 2688
+        'ref'   4846, 2010
+        'arr'   3773, 2228
+        'str'   2820, 1238
+        'raw'   1205,  882
+    """
+
+def unserialize_reference(text: str):
+    match = re.match("([^']*)'([^\.]*).([^']*)'",text)
+
+    if not match:
+        return None
+    return {
+        "importType": match[1],
+        "package": match[2],
+        "export": match[3],
+    }
+
+def unserialize_int(text: str):
+    try:
+        return int(text)
+    except ValueError:
+        return None
+    
+def unserialize_float(text: str):
+    try:
+        return float(text)
+    except ValueError:
+        return None
+    
+def unserialize_string(text: str):
+    match = re.match("^\"([^\"]*)\"$",text)
+
+    if not match:
+        return None
+    return match[1]
+
+
+
+def unserialize_array(text: str):
+    match = re.match("^\((.*)\)$",text)
+    if not match:
+        return None
+    
+    props = {}
+
+    inner_text = match[1]
+    items = inner_text.split(",")
+
+    for item in items:
+        
+        prop_regex = re.match(r"^([a-zA-Z0-9\(\)]+)=(.*)$", item)
+        prop_name, prop_value = prop_regex.groups()
+
+        prop_value_decoded = unserialize(prop_value)
+        props[prop_name] = prop_value_decoded
+
+    return props

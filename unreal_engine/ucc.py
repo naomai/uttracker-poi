@@ -29,6 +29,6 @@ class UccExportException(Exception):
     ucc_output: str
 
     def __init__(self, message: str, map_file: str, ucc_output: str=None):
-        Exception.__init(message)
+        Exception.__init__(self, message)
         self.map_file = map_file
         self.ucc_output = ucc_output
