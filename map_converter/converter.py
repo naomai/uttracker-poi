@@ -1,4 +1,4 @@
-from unreal_engine import ucc
+from unreal_engine import ucc, t3d
 from os import path
 import re
 from content_downloader import downloader
@@ -17,7 +17,8 @@ def process_job(job: dict):
         map_dir = path.join(destination_dir, map_name)
         polys_tmp = extract_polys(map_file, map_dir)
 
-        # notify T3D parser
+        with open(polys_tmp) as f:
+            t3d.parse_t3d(f.read())
 
     #except UccPackageMissingException as e:
     finally:
