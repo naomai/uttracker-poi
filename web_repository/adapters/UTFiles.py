@@ -11,9 +11,9 @@ __repo: Repository
 
 def init(store: RepositoryManager):
     global __repo
-    __repo = store.registerRepository("utfi")
-    __repo.setRefreshCallback(refreshAll)
-    __repo.setRateLimiterInterval(RATE_LIMITER)
+    __repo = store.register_repository("utfi")
+    __repo.set_adapter_refresh_callback(refreshAll)
+    __repo.set_ratelimiter_interval(RATE_LIMITER)
 
 def refreshAll():
     refreshPath("Airfight/","af")
@@ -41,7 +41,7 @@ def refreshPath(path: str, cacheFile: str, recursive: bool = False):
         urlRel = link.attr('href')
         url = urllib.parse.urljoin(WEBSITE_URL, urlRel)
         fileName = link.text()
-        __repo.storeLink(fileName, url)
+        __repo.store_link(fileName, url)
 
     if recursive:
         sublinkImgs = page("table.autoindex_table a img[alt='[dir]']").items()
@@ -55,10 +55,10 @@ def refreshPath(path: str, cacheFile: str, recursive: bool = False):
 def fetchIfOld(path: str, cacheFile: str):
     global __repo
     cacheFileFull = cacheFile + ".html"
-    age = __repo.getCacheFileAge(cacheFileFull)
+    age = __repo.get_page_cache_age(cacheFileFull)
     if age != None and age < CACHE_MAX_AGE:
         return None
-    return __repo.storeCacheFileFromWeb(cacheFileFull, __resolveUrl(path))
+    return __repo.download_page(cacheFileFull, __resolveUrl(path))
     
 def __resolveUrl(path: str):
     return WEBSITE_URL + "?dir=Maps/" + path

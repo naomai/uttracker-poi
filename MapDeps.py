@@ -20,9 +20,9 @@ local_packages.paths_from_config(config['game'])
 local_packages.downloads_dir = ue_downloads_path
 
 links_repo = RepositoryManager("Storage/Repositories/links.db")
-links_repo.cacheDir = config['linkstore']['pages_dir']
-os.makedirs(links_repo.cacheDir, exist_ok=True)
-links_repo.refreshInterval = config['linkstore']['refresh_interval_min']
+links_repo.cache_dir = config['linkstore']['pages_dir']
+os.makedirs(links_repo.cache_dir, exist_ok=True)
+links_repo.refresh_interval = config['linkstore']['refresh_interval_min']
 RepositoryLoader.load(links_repo)
 links_repo.refresh()
 
@@ -30,13 +30,13 @@ links_repo.refresh()
 link_lookup.repository = links_repo
 link_lookup.downloader = downloader
 
-downloader.targetDir = config['downloads']['temp_dir']
-os.makedirs(downloader.targetDir, exist_ok=True)
+downloader.target_dir = config['downloads']['temp_dir']
+os.makedirs(downloader.target_dir, exist_ok=True)
 
-unpacker.workingDir = config['downloads']['unpack_dir']
-unpacker.destinationDir = ue_downloads_path
-os.makedirs(unpacker.workingDir, exist_ok=True)
-os.makedirs(unpacker.destinationDir, exist_ok=True)
+unpacker.working_dir = config['downloads']['unpack_dir']
+unpacker.destination_dir = ue_downloads_path
+os.makedirs(unpacker.working_dir, exist_ok=True)
+os.makedirs(unpacker.destination_dir, exist_ok=True)
 
 dependency_resolver.installed_store = local_packages
 dependency_resolver.web_repo = links_repo

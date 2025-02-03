@@ -1,7 +1,6 @@
 import os
 import re
 import sqlite3
-from pprint import pprint
 from .repository import Repository
 
 class RepositoryManager:
@@ -9,17 +8,17 @@ class RepositoryManager:
     Manages repositories of download links
     """
     __db = None
-    __repos = {}
-    cacheDir: str = "/Storage/Repositiories"
-    refreshInterval: int = 10080
+    __repos: dict[str, Repository] = {}
+    cache_dir: str = "/Storage/Repositiories"
+    refresh_interval: int = 10080
 
     def __init__(self, dbFile: str):
-        os.makedirs(self.cacheDir, exist_ok=True)
+        os.makedirs(self.cache_dir, exist_ok=True)
         os.makedirs(os.path.dirname(dbFile), exist_ok=True)
         self.__db = sqlite3.connect(dbFile)
-        self.__ensureDbStructure()
+        self.__ensure_db_structure()
 
-    def registerRepository(self, signature: str):
+    def register_repository(self, signature: str) -> Repository:
         """
         Creates a new `LinkRepository` instance for use with repo adapters
 
@@ -29,19 +28,19 @@ class RepositoryManager:
         Returns:
             Prepared `LinkRepository` object
         """
-        self.__verifySignature(signature)
+        self.__verify_signature(signature)
 
         cur = self.__db.cursor()
         repo = Repository(signature, cur)
-        repo.cacheDir = os.path.join(os.path.realpath(self.cacheDir), signature) 
+        repo.cache_dir = os.path.join(os.path.realpath(self.cache_dir), signature) 
 
-        if not os.path.exists(repo.cacheDir):
-            os.mkdir(repo.cacheDir)
+        if not os.path.exists(repo.cache_dir):
+            os.mkdir(repo.cache_dir)
 
         self.__repos[signature] = repo
         return repo
 
-    def getExpiredRepos(self):
+    def get_expired_repos(self) -> list[Repository]:
         """
         List all repositories with links cache older than 
         LinkStore.refreshInterval
@@ -51,8 +50,8 @@ class RepositoryManager:
         """
         expired = []
         for repo in self.__repos.values():
-            age = repo.getCacheAge()
-            if age >= self.refreshInterval * 60:
+            age = repo.get_cache_age()
+            if age >= self.refresh_interval * 60:
                 expired.append(repo)
         return expired
 
@@ -60,32 +59,31 @@ class RepositoryManager:
         """
         Download pages and parse links for all expired repositories
         """
-        expired = self.getExpiredRepos()
+        expired = self.get_expired_repos()
         
         for repo in expired:
             try:
-                repo.refreshStart()
-                repo.refreshEnd()
+                repo.refresh()
             finally:
                 self.__db.commit()
     
-    def getPackageLinkInfo(self, package):
+    def get_package_link_info(self, package) -> tuple[str, str]:
         cur = self.__db.cursor()
         res = cur.execute("SELECT `url`, `filename` FROM `links` WHERE `package`=:package",
                                     {'package':package.casefold()}
                                 )
-        repoRow = res.fetchone()
+        repo_row = res.fetchone()
 
-        if not repoRow:
+        if not repo_row:
             return None, None
         
-        return repoRow[0], repoRow[1]
+        return repo_row[0], repo_row[1]
 
-    def __verifySignature(_, signature: str):
+    def __verify_signature(_, signature: str):
         if not re.match("^[a-zA-Z0-9]{1,4}$", signature):
             raise ValueError("Invalid repository signature string")
 
-    def __ensureDbStructure(self):
+    def __ensure_db_structure(self):
         cur = self.__db.cursor()
 
         cur.execute("""CREATE TABLE IF NOT EXISTS `repos` (

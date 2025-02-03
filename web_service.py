@@ -5,10 +5,10 @@ from content_downloader import link_lookup
 
 store = None
 ENDPOINT_MAP_DOWNLOAD = "/download"
-serverThread = None
-httpServer = None
+__server_thread = None
+__http_server = None
 
-def handleMapDownload(postData):
+def handle_map_download(postData):
     try:
         request = json.loads(postData)
     except json.decoder.JSONDecodeError:
@@ -30,7 +30,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         response = {"error": "This GET request is not supported by the service"}
-        response = handleMapDownload("{\"map\":\"MH-AfterDark\"}")
+        response = handle_map_download("{\"map\":\"MH-AfterDark\"}")
         self.send_response(405)
         self.send_header("Content-type", "application/json")
         self.send_header("Content-length", str(len(json.dumps(response))))
@@ -40,13 +40,13 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         bytes = int(self.headers['Content-length'])
-        postData = self.rfile.read(bytes)
+        post_data = self.rfile.read(bytes)
 
         response = {'error': 'Requested resource was not found'}
         status = 404
         try:
             if self.path == ENDPOINT_MAP_DOWNLOAD:
-                response = handleMapDownload(postData)
+                response = handle_map_download(post_data)
                 status = 200
         except ValueError as e:
             response = {'error': str(e)}
@@ -56,25 +56,25 @@ class RequestHandler(BaseHTTPRequestHandler):
             status = 500
 
         self.send_response(status)
-        responseEncoded = json.dumps(response)
+        response_encoded = json.dumps(response)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(responseEncoded)))
+        self.send_header("Content-Length", str(len(response_encoded)))
         self.end_headers()
 
         self.wfile.write(str(response).encode('utf8'))
 
 
 def init(addr, port):
-    global serverThread, httpServer
+    global __server_thread, __http_server
     
 
-    serverAddress = (addr, port)
-    httpServer = HTTPServer(serverAddress, RequestHandler)
+    server_address = (addr, port)
+    __http_server = HTTPServer(server_address, RequestHandler)
 
-    serverThread = threading.Thread(target=serve)
-    serverThread.start()
+    __server_thread = threading.Thread(target=serve)
+    __server_thread.start()
     #serve()
 
 
 def serve():
-    httpServer.serve_forever()
+    __http_server.serve_forever()

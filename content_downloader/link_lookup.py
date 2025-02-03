@@ -1,6 +1,7 @@
 import orchestration
+from web_repository import RepositoryManager
 
-repository = None
+repository: RepositoryManager = None
 downloader = None
 
 # Why this module?
@@ -18,7 +19,7 @@ def request(package: str):
 def process_job(job: dict):
     package = job['package']
 
-    (url, filename) = repository.getPackageLinkInfo(package)
+    (url, filename) = repository.get_package_link_info(package)
 
     #if downloader.isDownloaded(filename):
         #response = {'status': 'Already downloaded'}

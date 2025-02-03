@@ -9,24 +9,24 @@ class WebClient:
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0) UTTracker/UnrealPOI/ContentDownloader (+https://github.com/naomai/uttracker-downloader)",
         }
-    __requestsLeft: int = 1
+    __requests_left: int = 1
     __url: str
 
     def __init__(self, url: str):
-        self.__setRequestUrl(url)
+        self.__set_request_url(url)
 
     def request(self, method: str="GET", body: str|bytes = None):
-        while self.__requestsLeft > 0:
+        while self.__requests_left > 0:
             print(self.__url)
             self.__client.request(method, self.__path, body, self.__headers)
             response = self.__client.getresponse()
             self.__response = response
     
-            redirectUrl = response.headers.get("Location")
-            if redirectUrl and response.status >= 300 and response.status <= 399:
+            url_redirect = response.headers.get("Location")
+            if url_redirect and response.status >= 300 and response.status <= 399:
                self.__headers['Referer'] = self.__url
-               self.__setRequestUrl(redirectUrl)
-               self.__requestsLeft = self.__requestsLeft - 1
+               self.__set_request_url(url_redirect)
+               self.__requests_left = self.__requests_left - 1
             else:
                 break
 
@@ -41,7 +41,7 @@ class WebClient:
         return self.request("POST", body)
     
     def follow(self, count: str=5):
-        self.__requestsLeft = count + 1
+        self.__requests_left = count + 1
         return self
     
 
@@ -51,16 +51,16 @@ class WebClient:
     def body(self):
         return self.__response.read()
     
-    def __setRequestUrl(self, url: str):
-        urlParsed = urlparse(url)
+    def __set_request_url(self, url: str):
+        url_parsed = urlparse(url)
 
-        if urlParsed.scheme == "http":
-            self.__client = HTTPConnection(urlParsed.hostname, urlParsed.port, timeout=10)
-        elif urlParsed.scheme == "https":
-            self.__client = HTTPSConnection(urlParsed.hostname, urlParsed.port, timeout=10)
+        if url_parsed.scheme == "http":
+            self.__client = HTTPConnection(url_parsed.hostname, url_parsed.port, timeout=10)
+        elif url_parsed.scheme == "https":
+            self.__client = HTTPSConnection(url_parsed.hostname, url_parsed.port, timeout=10)
 
-        path = urlParsed.path
-        if urlParsed.query:
-            path = path + "?" + urlParsed.query
+        path = url_parsed.path
+        if url_parsed.query:
+            path = path + "?" + url_parsed.query
         self.__path = path
         self.__url = url

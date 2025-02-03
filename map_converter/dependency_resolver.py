@@ -4,12 +4,13 @@ import re
 from content_downloader import downloader
 import unreal_engine
 from installed_packages_store import InstalledPackagesStore
+from web_repository import RepositoryManager
 import shutil
 import orchestration
 
 destination_dir = "./Storage/MapContent"
-installed_store = None
-web_repo = None
+installed_store: InstalledPackagesStore = None
+web_repo: RepositoryManager = None
 
 def process_job(job: dict):
     map_name = job['jobData']['mapName']
@@ -43,7 +44,7 @@ def resolve_dependencies(map_file: str, job: dict):
             # it might magically appear with next ones 
             continue
 
-        (url, fileName) = web_repo.getPackageLinkInfo(dependency['name'])
+        (url, fileName) = web_repo.get_package_link_info(dependency['name'])
         if not url:
             notify_skip_dependency(dependency['filename'], job)
             return False

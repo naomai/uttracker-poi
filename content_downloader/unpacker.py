@@ -8,28 +8,31 @@ from glob import glob
 from os import path
 import orchestration
 
-workingDir = None
-destinationDir = None
-
-def init():
-    pass
+working_dir = None
+destination_dir = None
 
 def process_job(job: dict):
     dest_dir = unpack(job['filePath'])
     job['unpackDir'] = dest_dir
     orchestration.queue_add("unpack_complete", job)
 
-def unpack(file: str):
-    wd = path.join(workingDir, str(time.time()))
+def unpack(archive_path: str):
+    """
+    Extract all files from provided archive file into `destination_dir`
+
+    Args:
+        archive_path: a path to the archive
+    """
+    wd = path.join(working_dir, str(time.time()))
     os.makedirs(wd)
     try:
-        patoolib.extract_archive(archive=file, outdir=wd)
-        copyFlat(wd, destinationDir)
+        patoolib.extract_archive(archive=archive_path, outdir=wd)
+        copy_flat(wd, destination_dir)
     finally:
         shutil.rmtree(wd)
-    return destinationDir
+    return destination_dir
     
-def copyFlat(src: str, dest: str):
+def copy_flat(src: str, dest: str):
     """
     Copy Unreal package files, flattening directory structure
     Scans `src` directory and its subdirectories for game content,
