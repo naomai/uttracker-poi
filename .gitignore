@@ -173,6 +173,8 @@ cython_debug/
 
 #UnrealPOI
 
+config.yaml
 Storage/Downloads/
 Storage/Repositories/
 Storage/Unpacked/
+Storage/MapContent/

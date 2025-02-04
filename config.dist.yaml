@@ -6,7 +6,7 @@ unrealpoi:
         #   it provides UCC tool, and will store all downloads
         # It is recommended to be a standalone instance - only for this single purpose
         # `UTTDownloads` directory will be created for downloads
-        main: "C:\\Users\\tmdvt\\Desktop\\games\\UnrealTournament\\"
+        main: "/mnt/sda/UnrealTournament"
 
         # Additional read-only instances
         # Allows to use content from cache of your gaming installation
