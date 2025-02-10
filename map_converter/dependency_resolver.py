@@ -5,7 +5,6 @@ from content_downloader import downloader
 import unreal_engine
 from installed_packages_store import InstalledPackagesStore
 from web_repository import RepositoryManager
-import shutil
 import orchestration
 
 destination_dir = "./Storage/MapContent"

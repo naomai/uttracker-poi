@@ -3,19 +3,21 @@ from os import path
 import re
 import json
 from content_downloader import downloader
-import shutil
+from urllib import parse as urlparse
 
 destination_dir = "./Storage/MapContent"
 
 def process_job(job: dict):
-    map_name = job['mapName']
+    map_name: str = job['mapName']
     map_file = path.join(job['unpackDir'], map_name + ".unr")
+    map_dirname = urlparse.quote(map_name.casefold())
 
     if not path.exists(map_file):
         return
 
     try:
-        map_dir = path.join(destination_dir, map_name)
+
+        map_dir = path.join(destination_dir, map_dirname)
         level_tmp_path = extract_level(map_file, map_dir)
 
         with open(level_tmp_path) as f:
