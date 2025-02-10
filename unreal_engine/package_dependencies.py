@@ -20,24 +20,6 @@ class UEPackageDependencies:
                         'objects': {},
                     }
 
-            else:
-                root = package.getObjectRoot(imp)
-                rootName = root['name']
-
-                if not rootName in self.importedPackages:
-                    self.importedPackages[rootName] = {
-                        'name': rootName,
-                        'refs': 0,
-                        'objects': {},
-                    }
-
-                dependency = self.importedPackages[rootName]
-                if not importType in dependency['objects']:
-                    dependency['objects'][importType] = []
-
-                dependency['objects'][importType].append(importName)
-                dependency['refs'] = dependency['refs'] + 1
-        
 
         for _, dependency in self.importedPackages.items():
             ext = self.guessPackageFileExtension(dependency)
