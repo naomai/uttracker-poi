@@ -2,9 +2,10 @@ import os
 import orchestration
 from web_repository import RepositoryManager
 from installed_packages_store import InstalledPackagesStore
+from content_downloader import downloader as dl
 
 repository: RepositoryManager = None
-downloader = None
+downloader: dl = None
 installed_packages: InstalledPackagesStore = None
 
 # Why this module?
@@ -35,6 +36,6 @@ def process_job(job: dict):
         orchestration.queue_add("dependencies_retry", job)
         return
 
-    (url, filename) = repository.get_package_link_info(package)
+    (url, archive_filename, filename) = repository.get_package_link_info(package)
 
-    downloader.download(url, filename, job)
+    downloader.download(url, archive_filename, job['jobData'])

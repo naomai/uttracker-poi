@@ -56,7 +56,8 @@ def parse_map_file(file_path: str):
             sub_package, sub_ext = path.splitext(sub_filename)
 
             __repo.store_link(url=url, filename=sub_filename,
-                              package_name=sub_package)
+                              package_name=sub_package, 
+                              container_filename=download_filename)
         
 
 

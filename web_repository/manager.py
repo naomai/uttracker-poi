@@ -51,7 +51,8 @@ class RepositoryManager:
         expired = []
         for repo in self.__repos.values():
             age = repo.get_cache_age()
-            if age >= self.refresh_interval * 60:
+            if age >= repo.refresh_interval:
+            
                 expired.append(repo)
         return expired
 
@@ -69,15 +70,16 @@ class RepositoryManager:
     
     def get_package_link_info(self, package) -> tuple[str, str]:
         cur = self.__db.cursor()
-        res = cur.execute("SELECT `url`, `filename` FROM `links` WHERE `package`=:package",
+        res = cur.execute("SELECT `url`, `container_filename`, `filename` FROM `links` WHERE `package`=:package",
                                     {'package':package.casefold()}
                                 )
         repo_row = res.fetchone()
 
         if not repo_row:
-            return None, None
+            return None, None, None
         
-        return repo_row[0], repo_row[1]
+        return repo_row[0], repo_row[1], repo_row[2]
+
 
     def __verify_signature(_, signature: str):
         if not re.match("^[a-zA-Z0-9]{1,4}$", signature):
@@ -97,8 +99,10 @@ class RepositoryManager:
                     `link_id` INTEGER PRIMARY KEY,
                     `repo_id` INTEGER NOT NULL,
                     `package` TEXT NOT NULL,
-                    `filename` TEXT NOT NULL,
-                    `url` TEXT NOT NULL UNIQUE
+                    `filename` TEXT,
+                    `container_filename` TEXT NOT NULL,
+                    `url` TEXT NOT NULL,
+                    UNIQUE(filename, url) ON CONFLICT IGNORE
                     )""")
         self.__db.commit()
 

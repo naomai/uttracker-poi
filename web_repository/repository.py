@@ -9,6 +9,7 @@ class Repository:
     downloaded pages.
     """
     cache_dir: str
+    refresh_interval: int = 10800
     __cur: sqlite3.Cursor = None
     __signature: str
     __repo_db_id: int
@@ -22,7 +23,7 @@ class Repository:
         self.__signature = signature
         self.__create_table_entry()
 
-    def store_link(self, filename: str, url: str):
+    def store_link(self, container_filename: str, url: str, package_name: str=None, filename: str=None):
         """
         Save encountered file link. 
 
@@ -33,16 +34,21 @@ class Repository:
         """
         self.__modified = True
 
-        package_name = os.path.splitext(filename)[0]
+        if package_name == None:
+            if filename != None:
+                package_name = os.path.splitext(filename)[0]
+            else:
+                package_name = os.path.splitext(container_filename)[0]
 
         self.__cur.execute("""
-            INSERT OR IGNORE INTO `links` (`repo_id`, `package`, `filename`, `url`)
-            VALUES(:repo, :package, :filename, :url)
+            INSERT OR IGNORE INTO `links` (`repo_id`, `package`, `container_filename`, `url`, 'filename')
+            VALUES(:repo, :package, :container_filename, :url, :filename)
             """, {
                 'repo': self.__repo_db_id,
                 'package': package_name.casefold(),
-                'filename': filename,
-                'url': url   
+                'container_filename': container_filename,
+                'url': url,
+                'filename': filename
             })
 
 

@@ -45,15 +45,16 @@ def resolve_dependencies(map_file: str, job: dict):
             # it might magically appear with next ones 
             continue
 
-        (url, fileName) = web_repo.get_package_link_info(dependency['name'])
+        (url, archive_filename, filename) = web_repo.get_package_link_info(dependency['name'])
         if not url:
             notify_skip_dependency(dependency['filename'], job)
             return False
 
 
-        downloader.download(url, fileName, {
+
+        downloader.download(url, archive_filename, {
                 'workflow': 'missing_dependency',
-                'missingFile': fileName,
+                'missingFile': filename,
                 'superJob': job,
             })
         # single download scheduled, end task
