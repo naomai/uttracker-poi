@@ -7,7 +7,7 @@ import orchestration
 
 target_dir = "./Storage/Downloads"
 
-def download(url: str, filename = None, job_data = None):
+def download(url: str, filename = None, job = None):
     """
     Request download of a file 
 
@@ -18,28 +18,27 @@ def download(url: str, filename = None, job_data = None):
     if not url:
         return
     
+    job['url'] = url
+    job['file'] = filename
+    
     if is_downloaded(filename):
         # skip downloading and fall through, maybe add skipped flag?
-        notify_complete(url, filename, get_download_path(filename), job_data)
+        notify_complete(url, filename, get_download_path(filename), job)
         return
 
-    orchestration.queue_add("download_request", {
-            'url':url, 
-            'file': filename, 
-            'jobData': job_data,
-        })
+    orchestration.queue_add("download_request", job)
 
 def process_job(job: dict):
-    asyncio.run(__fetch(job['url'], job['file'], job['jobData']))
+    asyncio.run(__fetch(job['url'], job['file'], job))
 
-async def __fetch(url, filename = None, job_data = None):
+async def __fetch(url, filename = None, job = None):
     """
     Fetch file from URL asynchronously, and notify orchestrator
 
     Args:
         url: a URL of file to be downloaded
         filename: name of the file (includes extension)
-        job_data: job params received from previous step
+        job: job object received from previous step
     """
     async with aiohttp.ClientSession() as client:
         async with client.get(url) as resp:
@@ -63,7 +62,7 @@ async def __fetch(url, filename = None, job_data = None):
                         if not data:
                             break
                         pkg.write(data)
-                notify_complete(url, filename, target_file, job_data)
+                notify_complete(url, filename, target_file, job)
             except Exception:
                 pass
 
@@ -89,14 +88,13 @@ def get_download_path(filename):
 
     return os.path.join(target_dir, filename)
 
-def notify_complete(url, file_name, file_path, job_data):
+def notify_complete(url, file_name, file_path, job):
     """
     Mark this task as complete, and pass the job params to the next step
     """
-    orchestration.queue_add("download_complete", {
-                            'url': url,
-                            'file': file_name,
-                            'filePath': file_path,
-                            'jobData': job_data,
-                        })
+    job['url'] = url
+    job['file'] = file_name
+    job['filePath'] = file_path
+
+    orchestration.queue_add("download_complete", job)
     

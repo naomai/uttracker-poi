@@ -50,21 +50,26 @@ class InstalledPackagesStore:
         if not pathReal in self.paths:
             self.__update_ue_directory(pathReal)
 
-    def find(self, file: str) -> list[str]:
+    def find(self, package_name: str) -> list[str]:
         """
-        Searches local store for file. 
-        If the file is present in cache, silently pull it
+        Searches local store for package. 
+        If the package is present in cache, silently pull it
         into `UTTDownloads` folder.
 
         Args:
-            file: name of file to be found
+            package: name of package to be found
         Returns:
-            List of all locations in which the file was found, provided as dicts: 
-            {'name': "CTF-Face.unr", 'path': "/mnt/usb0/Unreal/Maps/CTF-Face.unr"}
+            List of all locations in which the package was found, 
+            provided as dicts: 
+            {
+                'name': "CTF-Face.unr", 
+                'package': "CTF-Face", 
+                'path': "/mnt/usb0/Unreal/Maps/CTF-Face.unr"
+            }
         """
 
         def _append_matching(acc: list, f: dict):
-            if f['name'].casefold()  == file.casefold():
+            if f['package'].casefold()  == package_name.casefold():
                 acc.append(f)
             return acc
 
@@ -80,6 +85,14 @@ class InstalledPackagesStore:
                 files.append(pulled)
 
         return files
+    
+    def reload(self):
+        """
+        Reload cached list of installed packages
+        in all UE instances of this store
+        """
+        for path in self.paths:
+            self.__update_ue_directory(path)
     
     def __update_ue_directory(self, path: str):
         self.__validate_ue_installation(path)
@@ -117,7 +130,11 @@ class InstalledPackagesStore:
         Returns:
             List of all found packages, provided as dicts: 
             ```
-            {'name': "CTF-Face.unr", 'path': "/mnt/usb0/Unreal/Maps/CTF-Face.unr"}
+            {
+                'name': "CTF-Face.unr", 
+                'package': "CTF-Face",
+                'path': "/mnt/usb0/Unreal/Maps/CTF-Face.unr"
+            }
             ```
         """
         cache = []
@@ -142,7 +159,11 @@ class InstalledPackagesStore:
         Returns:
             List of all matching files, provided as dicts: 
             ```
-            {'name': "CTF-Face.unr", 'path': "/mnt/usb0/Unreal/Maps/CTF-Face.unr"}
+            {
+                'name': "CTF-Face.unr", 
+                'package': "CTF-Face",
+                'path': "/mnt/usb0/Unreal/Maps/CTF-Face.unr"
+            }
             ```
         """
         files = []
@@ -150,6 +171,7 @@ class InstalledPackagesStore:
         files = list(map(
             lambda f: {
                 'name': os.path.basename(f),
+                'package': os.path.splitext(os.path.basename(f))[0],
                 'path': os.path.join(root_dir, f),
             },
             glob_list
@@ -167,7 +189,11 @@ class InstalledPackagesStore:
         Returns:
             List of all found packages, provided as dicts: 
             ```
-            {'name': "CTF-LiandriDocks.unr", 'path': "/mnt/usb0/Unreal/Cache/9BFAA89C45FB592A549F63B481225292.uxx"}
+            {
+                'name': "CTF-LiandriDocks.unr", 
+                'package': "CTF-LiandriDocks", 
+                'path': "/mnt/usb0/Unreal/Cache/9BFAA89C45FB592A549F63B481225292.uxx"
+            }
             ```
         """
         cache_dir = os.path.join(path, "Cache")
@@ -182,6 +208,7 @@ class InstalledPackagesStore:
             if os.path.exists(entry_path):
                 cache_entry = {
                     'name': cache_raw_entry[1],
+                    'package': os.path.splitext(cache_raw_entry[1])[0],
                     'path': entry_path,
                 }
                 list.append(cache_entry)

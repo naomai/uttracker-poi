@@ -8,7 +8,7 @@ import shutil
 destination_dir = "./Storage/MapContent"
 
 def process_job(job: dict):
-    map_name = job['jobData']['mapName']
+    map_name = job['mapName']
     map_file = path.join(job['unpackDir'], map_name + ".unr")
 
     if not path.exists(map_file):

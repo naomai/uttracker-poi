@@ -26,9 +26,7 @@ def process_job(job: dict):
     job['mapName'] = package
     del job['package']
     
-    filename = f"{package}.unr"
-
-    local_paths = installed_packages.find(filename)
+    local_paths = installed_packages.find(package)
 
     if len(local_paths) > 0:
         job['jobData']['mapName'] = package
@@ -38,4 +36,4 @@ def process_job(job: dict):
 
     (url, archive_filename, filename) = repository.get_package_link_info(package)
 
-    downloader.download(url, archive_filename, job['jobData'])
+    downloader.download(url, archive_filename, job)
