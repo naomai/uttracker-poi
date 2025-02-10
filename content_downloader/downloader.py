@@ -15,7 +15,10 @@ def download(url: str, filename = None, job_data = None):
         url: a URL of file to be downloaded
         filename: name of the file (includes extension)
     """
-    if is_downloaded(filename) or not filename:
+    if not url:
+        return
+    
+    if is_downloaded(filename):
         # skip downloading and fall through, maybe add skipped flag?
         notify_complete(url, filename, get_download_path(filename), job_data)
         return
