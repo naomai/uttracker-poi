@@ -142,7 +142,7 @@ def unserialize(text: str):
     """
 
 def unserialize_reference(text: str):
-    match = re.match("([^']*)'([^\.]*).([^']*)'",text)
+    match = re.match("([A-Za-z0-9]*)'([^\.]*).([^']*)'",text)
 
     if not match:
         return None
