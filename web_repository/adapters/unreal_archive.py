@@ -14,6 +14,7 @@ def init(store: RepositoryManager):
     global __repo
     __repo = store.register_repository("utar")
     __repo.set_adapter_refresh_callback(refresh)
+    __repo.refresh_interval = CACHE_MAX_AGE
 
 def refresh():
     reload_local_files()
