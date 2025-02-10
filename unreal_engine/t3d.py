@@ -179,16 +179,39 @@ def unserialize_array(text: str):
         return None
     
     props = {}
+    prop_name: str = ""
+    prop_value: str = ""
+    getting_value = False
+    array_nesting_level = 0
+    string_open = False
 
-    inner_text = match[1]
-    items = inner_text.split(",")
+    inner_text: str = match[1]
+    
+    for ch in inner_text:
+        if not getting_value:
+            if ch == "=":
+                getting_value = True
+                continue
+            else:
+                prop_name += ch
+        else:
+            if ch == "\"":
+                string_open = not string_open
 
-    for item in items:
-        
-        prop_regex = re.match(r"^([a-zA-Z0-9\(\)]+)=(.*)$", item)
-        prop_name, prop_value = prop_regex.groups()
+            if not string_open:
+                if ch == "(":
+                    array_nesting_level = array_nesting_level + 1
+                elif ch == ")":
+                    array_nesting_level = array_nesting_level - 1
+                elif ch == "," and array_nesting_level == 0:
+                    props[prop_name] = unserialize(prop_value)
+                    prop_name = ""
+                    prop_value = ""
+                    getting_value = False
+                    continue
+            prop_value += ch
 
-        prop_value_decoded = unserialize(prop_value)
-        props[prop_name] = prop_value_decoded
+    if prop_name != "":
+        props[prop_name] = unserialize(prop_value)
 
     return props
