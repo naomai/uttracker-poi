@@ -1,14 +1,29 @@
+"""
+Unreal Archive links adapter
+Thanks to courtesy of Kenneth "Shrimp" Watson (https://unrealarchive.org/)
+
+Obtains links to maps and its dependent packages
+from vast resources of well documented archive.
+
+The data is sourced from official Git repo, and requires
+to be processed from YAML files for each map.
+"""
+
 from ..manager import RepositoryManager
 from ..repository import Repository
 import yaml 
-import urllib
+import os
+import subprocess
 import glob
 from os import path
 
 REPO_URL = "https://github.com/unreal-archive/unreal-archive-data.git"
+GIT_COMMAND = "git"
 CACHE_MAX_AGE = 60 * 60 * 24 * 30 # 30 days
 
 __repo: Repository
+
+
 
 def init(store: RepositoryManager):
     global __repo
@@ -61,6 +76,45 @@ def parse_map_file(file_path: str):
                               container_filename=download_filename)
         
 
+def __clone_git_repo():
+    f"""
+    git clone --no-checkout --filter=tree:0 {REPO_URL} {__repo.cache_dir}
+    git sparse-checkout init --cone 
+    git sparse-checkout set "content/Unreal" "content/Unreal Tournament"
+    git checkout
+    """
+    previous_wd = os.getcwd()
+    if not __git_is_fetched():
+        __git_exec("clone", [
+            "--no-checkout", 
+            "--filter=tree:0", 
+            REPO_URL, 
+            __repo.cache_dir
+        ])
+        os.chdir(__repo.cache_dir)
+        __git_exec("sparse-checkout", ["init", "--cone"])
+        __git_exec("sparse-checkout", ["set", "content/Unreal", "content/Unreal Tournament"])
+    else:
+        __git_exec("fetch", ["origin"])
+    __git_exec("checkout")
+    os.chdir(previous_wd)
+
+
+def __git_exec(command: str, args: list[str]=[]):
+    command_with_args = [GIT_COMMAND, command]
+    command_with_args.extend(args)
+    result = subprocess.run(command_with_args, 
+                            capture_output=True, text=True)
+    return result.stdout
+
+def __git_is_fetched():
+    return path.exists(path.join(__repo.cache_dir, ".git" ))
+
+def __git_is_behind():
+    previous_wd = os.getcwd()
+    __git_exec("fetch", ["origin"])
+
+    os.chdir(previous_wd)
 
 def any_constructor(loader, tag_suffix, node):
     if isinstance(node, yaml.MappingNode):
@@ -70,3 +124,5 @@ def any_constructor(loader, tag_suffix, node):
     return loader.construct_scalar(node)
 
 yaml.add_multi_constructor('', any_constructor, Loader=yaml.SafeLoader)
+
+
