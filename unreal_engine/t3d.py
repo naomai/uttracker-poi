@@ -95,9 +95,9 @@ def parse_coord(text: str):
         return None
 
     return {
-        "X": match[1],
-        "Y": match[2],
-        "Z": match[3],
+        "X": unserialize_float(match[1]),
+        "Y": unserialize_float(match[2]),
+        "Z": unserialize_float(match[3]),
     }
 
 def parse_pan(text: str):
@@ -105,8 +105,8 @@ def parse_pan(text: str):
     if not match:
         return None
     return {
-        "U": match[1],
-        "V": match[2],
+        "U": unserialize_int(match[1]),
+        "V": unserialize_int(match[2]),
     }
 
 def unserialize(text: str):
