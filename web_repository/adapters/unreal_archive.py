@@ -32,6 +32,9 @@ def init(store: RepositoryManager):
     __repo.refresh_interval = CACHE_MAX_AGE
 
 def refresh():
+    if __git_pull_needed():
+        __clone_git_repo()
+
     reload_local_files()
 
 def reload_local_files():
@@ -107,14 +110,19 @@ def __git_exec(command: str, args: list[str]=[]):
                             capture_output=True, text=True)
     return result.stdout
 
+def __git_pull_needed():
+    return not __git_is_fetched() or __git_is_behind()
+
 def __git_is_fetched():
     return path.exists(path.join(__repo.cache_dir, ".git" ))
 
 def __git_is_behind():
     previous_wd = os.getcwd()
     __git_exec("fetch", ["origin"])
-
+    out = __git_exec("log", ["..origin", "--pretty='utt_commit %h'"])
+    is_behind = out.find("utt_commit ")
     os.chdir(previous_wd)
+    return is_behind
 
 def any_constructor(loader, tag_suffix, node):
     if isinstance(node, yaml.MappingNode):
