@@ -6,9 +6,12 @@ class UEPackageDependencies:
         for imp in package.imports.items:
             importType = imp['class']
             importName = imp['name']
-            if importType=="Package":
-                if imp['outer'] != 0:
+            
+            if imp['outer'] != 0:
                     continue
+            
+            if importType=="Package":
+                
 
                 if not importName in self.importedPackages:
                     self.importedPackages[importName] = {
