@@ -16,6 +16,7 @@ def download(url: str, filename = None, job = None):
         filename: name of the file (includes extension)
     """
     if not url:
+        print(f"Download URL not provided")
         return
     
     job['url'] = url

@@ -42,6 +42,8 @@ def resolve_dependencies(map_file: str, job: dict):
     if len(deps) == 0:
         return 0
 
+    print(f"Missing dependencies: {deps}")
+
     for dependency in deps:
         missing_deps.append({
             "info": dependency,
