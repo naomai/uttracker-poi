@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b8bac42384dac53c2b493b9b5e975523",
+    "content-hash": "f4aa5f50bcdd9b5613802cc6cd4b6288",
     "packages": [
         {
             "name": "naomai/php-layers",
@@ -12,7 +12,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/naomai/php-layers.git",
-                "reference": "0e5993bc5e0bc201c9e35cc49c16944c5c7b3c35"
+                "reference": "847f526"
             },
             "require": {
                 "php": ">=8.0"
@@ -29,7 +29,7 @@
                 }
             },
             "description": "Create your images in PHP using layers, like in Photoshop",
-            "time": "2024-09-09T10:55:22+00:00"
+            "time": "2025-02-11T14:07:33+00:00"
         }
     ],
     "packages-dev": [],

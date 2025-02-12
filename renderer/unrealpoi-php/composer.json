@@ -13,7 +13,7 @@
         }
     ],
     "require": {
-        "naomai/php-layers": "dev-master"
+        "naomai/php-layers": "dev-master#847f526"
     },
     "repositories": [
         {
