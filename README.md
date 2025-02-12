@@ -5,6 +5,8 @@ Toolchain for generating Point-of-interests maps of Unreal Tournament levels.
 It can obtain almost every UT level made in the past 25 years, by
 searching for download links in various sources.
 
+![A top-down blueprint of level MH-CrystalMine3](docs/ort.png)
+
 ## Requirements
 - [Python](https://www.python.org/downloads/) 3.10+ with venv
 - [PHP](https://www.php.net/downloads.php) 8.2+
@@ -63,3 +65,5 @@ The level is added to the queue, and will be processed in the background.
 
 All the products of the generation will be available in directory
 **Storage/MapContent/(name_of_level)**, unless configured otherwise.
+
+![A top-down blueprint of level MH-CrystalMine3](docs/iso.png)
