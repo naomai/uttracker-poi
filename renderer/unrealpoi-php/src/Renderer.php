@@ -80,7 +80,7 @@ if(isset($opts['fhd'])) {
     $SCREENY = $imageSizeNormalY;
 }
 
-    $cacheFileSuffix .= "-".$colorSchemeName;
+$cacheFileSuffix .= "-".$colorSchemeName;
 
 
 $layoutTargetFile = $mapWorkingDir . "/layout_{$cacheFileSuffix}.png";
@@ -95,7 +95,7 @@ if(!file_exists($mapFile)) {
     exit;
 }
 
-error_reporting(E_ALL);
+$isHighRes = $SCREENX >= 1024;
 
 $emptyCoord=array("X"=>0,"Y"=>0,"Z"=>0);
 
@@ -257,7 +257,7 @@ $report=[
     'usedTextures'=>array()
 ];
 
-foreach($actors as $act){
+foreach($actors as $act) {
     /* SECOND ITERATION
     Draw world geometry 
     */
@@ -848,7 +848,12 @@ foreach($actors as $act){
         $displayedTags[$tag]=true;
 
     }else if($class=="zoneinfo"){
-        if(!isset($act['ZoneName'])) continue;
+        if(!$isHighRes){
+            continue;
+        }
+        if(!isset($act['ZoneName'])) {
+            continue;
+        }
         $desc=$act['ZoneName'];
 
         $loc2d=$projectionFunction($loc);
@@ -889,7 +894,7 @@ foreach($actors as $act){
 }
 
 // Actor group labels - draw only for larger resolutions
-if($SCREENX >= 1024) {
+if($isHighRes) {
     foreach($actorsGroupsFirstAct as $gn=>$ax){
         
         if(isset($ax['uttpr_props'])){
@@ -1067,9 +1072,9 @@ function finishImage(Image $img){
     $mapTitle=(isset($report['title']) && $report['title']?$report['title']:$mapName);
     $finalLayer = $img->getLayerByIndex(-1);
     $gd = $finalLayer->getGDHandle();
-    imagettftextlcd($gd,12,0,4,17,$scheme['mapName'],$fontsLoc ."/segoeuib.ttf",$mapTitle);
+    imagettftext($gd,12,0,4,17,$scheme['mapName'],$fontsLoc ."/segoeuib.ttf",$mapTitle);
     if(isset($report['author'])) {
-        imagettftextlcd($gd,9,0,4,30,$scheme['mapName'],$fontsLoc ."/segoeuib.ttf"," by {$report['author']}");
+        imagettftext($gd,9,0,4,30,$scheme['mapName'],$fontsLoc ."/segoeuib.ttf"," by {$report['author']}");
     }
 
 }
@@ -1079,4 +1084,5 @@ function polysFailure(string $reason){
     global $mapWorkingDir;
     file_put_contents($mapWorkingDir . "/poly_fail.txt", $reason);
     logWrite("Aborted: Processing failed with message: $reason");
+    exit;
 }
