@@ -32,10 +32,6 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         response = {"error": "This GET request is not supported by the service"}
 
-        map = urlparse(self.path).query
-        if map != '':
-            response = handle_map_download("{\"map\":\""+map+"\"}")
-
         self.send_response(405)
         self.send_header("Content-type", "application/json")
         self.send_header("Content-length", str(len(json.dumps(response))))
