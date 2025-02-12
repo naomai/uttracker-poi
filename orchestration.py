@@ -4,6 +4,7 @@ import queue
 
 from content_downloader import downloader, unpacker, link_lookup
 from map_converter import converter, dependency_resolver
+from renderer import renderer
 
 task_queue = queue.Queue()
 my_thread = None
@@ -39,4 +40,6 @@ def dispatch_job(job: tuple):
     elif tag == "dependencies_complete":
         converter.process_job(data)
     elif tag == "dependencies_failure":
-        print(f"Failed processing map {data['jobData']['mapName']}")
+        print(f"Failed processing map {data['mapName']}")
+    elif tag == "convert_complete":
+        renderer.process_job(data)

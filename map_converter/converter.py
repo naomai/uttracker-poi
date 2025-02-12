@@ -2,6 +2,7 @@ from unreal_engine import ucc, t3d
 from os import path
 import re
 import json
+import orchestration
 from content_downloader import downloader
 from urllib import parse as urlparse
 
@@ -26,6 +27,9 @@ def process_job(job: dict):
                 map = t3d.parse_t3d(f.read())
             export_level_json(level_converted_path, map)
 
+        job['levelJson'] = path.realpath(level_converted_path)
+        job['workDir'] = path.realpath(map_dir)
+        orchestration.queue_add("convert_complete", job)
         
 
     except UccPackageMissingException as e:
