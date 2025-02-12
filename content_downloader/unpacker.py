@@ -13,7 +13,7 @@ destination_dir = None
 
 def process_job(job: dict):
     dest_dir = unpack(job['filePath'])
-    job['unpackDir'] = dest_dir
+    job['unpackDir'] = path.realpath(dest_dir)
     orchestration.queue_add("unpack_complete", job)
 
 def unpack(archive_path: str):
