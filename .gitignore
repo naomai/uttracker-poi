@@ -178,3 +178,6 @@ Storage/Downloads/
 Storage/Repositories/
 Storage/Unpacked/
 Storage/MapContent/
+
+#Renderer
+renderer/unrealpoi-php/vendor/
