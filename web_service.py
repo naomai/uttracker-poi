@@ -62,7 +62,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(response_encoded)))
         self.end_headers()
 
-        self.wfile.write(str(response).encode('utf8'))
+        self.wfile.write(response_encoded.encode('utf8'))
 
 
 def init(addr, port):
