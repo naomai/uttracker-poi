@@ -199,8 +199,8 @@ function UEVertTransform(&$verts, $mainScaleVec, $postScaleVec, $tempScaleVec,
 	);
 	$rotMatrixG = array( //{{1,0,0},{0,cosg,-sing},{0,sing,cosg}}
 		array( 1    ,  0    ,  0    ),
-		array( 0    ,  $cosg,  $sing),
-		array( 0    , -$sing,  $cosg)
+		array( 0    ,  $cosg, -$sing),
+		array( 0    ,  $sing,  $cosg)
 	);
 
 	$rotMatrix = matrixMult(matrixMult($rotMatrixB, $rotMatrixG),$rotMatrixA);
