@@ -1078,5 +1078,5 @@ function finishImage(Image $img){
 function polysFailure(string $reason){
     global $mapWorkingDir;
     file_put_contents($mapWorkingDir . "/poly_fail.txt", $reason);
-    logWrite("Processing failed with message: $reason");
+    logWrite("Aborted: Processing failed with message: $reason");
 }
