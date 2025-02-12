@@ -1,4 +1,5 @@
 import re
+import math
 
 def parse_t3d(contents: bytes):
     models = parse_brushes(contents)
@@ -56,8 +57,6 @@ def parse_actor_props(actor_content: str):
 
         prop_value_decoded = unserialize(prop_value)
         props[prop_name] = prop_value_decoded
-
-        # TODO unserialize (t3dparserVersionWhatever.php:56)
     return props
 
 
@@ -160,7 +159,11 @@ def unserialize_int(text: str):
     
 def unserialize_float(text: str):
     try:
-        return float(text)
+        result = float(text)
+        if math.isinf(result) or math.isnan(result):
+            # workaround for JSON lib incorrectly encoding NaNs and Infs
+            return None
+        return result
     except ValueError:
         return None
     
