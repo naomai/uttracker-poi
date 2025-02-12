@@ -1,5 +1,5 @@
 from unreal_engine import ucc, t3d
-from os import path
+from os import path, remove
 import re
 import json
 import orchestration
@@ -12,20 +12,22 @@ def process_job(job: dict):
     map_name: str = job['mapName']
     map_file = path.join(job['unpackDir'], map_name + ".unr")
     map_dirname = urlparse.quote(map_name.casefold())
+    map_dir = path.join(destination_dir, map_dirname)
+    level_converted_path = path.join(map_dir, "level.json") 
 
-    if not path.exists(map_file):
+    map_unr_exists = path.exists(map_file)
+    map_json_exists = path.exists(level_converted_path)
+
+    if not map_unr_exists and not map_json_exists:
+        # previous step failed, nothing to do
         return
-
     try:
-
-        map_dir = path.join(destination_dir, map_dirname)
-        level_converted_path = path.join(map_dir, "level.json") 
-
-        if not path.exists(level_converted_path):
+        if not map_json_exists:
             level_tmp_path = extract_level(map_file, map_dir)
             with open(level_tmp_path) as f:
                 map = t3d.parse_t3d(f.read())
             export_level_json(level_converted_path, map)
+            remove(level_tmp_path)
 
         job['levelJson'] = path.realpath(level_converted_path)
         job['workDir'] = path.realpath(map_dir)
