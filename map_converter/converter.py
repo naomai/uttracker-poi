@@ -18,13 +18,14 @@ def process_job(job: dict):
     try:
 
         map_dir = path.join(destination_dir, map_dirname)
-        level_tmp_path = extract_level(map_file, map_dir)
-
-        with open(level_tmp_path) as f:
-            map = t3d.parse_t3d(f.read())
-
         level_converted_path = path.join(map_dir, "level.json") 
-        export_level_json(level_converted_path, map)
+
+        if not path.exists(level_converted_path):
+            level_tmp_path = extract_level(map_file, map_dir)
+            with open(level_tmp_path) as f:
+                map = t3d.parse_t3d(f.read())
+            export_level_json(level_converted_path, map)
+
         
 
     except UccPackageMissingException as e:
