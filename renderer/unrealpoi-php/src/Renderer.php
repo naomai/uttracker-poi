@@ -147,8 +147,8 @@ utt_checkpoint("BeginParse");
 
 if(file_exists($mapFile)) {
     $actors=json_decode(file_get_contents($mapFile), true);
-    if(!count($actors)){
-        polysFailure("Empty JSON poly file: " . realpath($mapFile));
+    if($actors===null || !count($actors)){
+        polysFailure("Invalid JSON poly file: " . realpath($mapFile));
         exit;
     }
 } else {
