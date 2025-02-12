@@ -14,9 +14,17 @@ game_path: str
 def exec(command: str, *args):
     command_with_args = [__get_ucc_path(), command]
     command_with_args.extend(args)
-    result = subprocess.run(command_with_args, 
-                            capture_output=True, text=True)
-    return result.stdout
+    
+    result = ""
+    with subprocess.Popen(command_with_args, 
+                            stdout=subprocess.PIPE,
+                            universal_newlines=True
+                        ) as process:
+        for line in process.stdout:
+            print(line, end='')
+            result += line
+
+    return result
     
 
 
