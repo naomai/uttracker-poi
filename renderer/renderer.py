@@ -2,6 +2,7 @@ import subprocess
 from os import path, getcwd, chdir
 import shlex
 import sys
+import orchestration
 
 RENDERER_PATH = path.realpath(
     path.join(path.dirname(__file__) , "unrealpoi-php")
@@ -29,6 +30,8 @@ def render(level_json_path: str, destination_dir: str):
         __renderer_exec(options)
         options["fhd"]=True
         __renderer_exec(options)
+
+        orchestration.queue_add("render_complete", job)
     except RuntimeError as e:
         print(f"Renderer error: {str(e)}")
     

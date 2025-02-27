@@ -8,6 +8,7 @@ from content_downloader import downloader, unpacker, link_lookup
 from map_converter import dependency_resolver
 from unreal_engine import ucc
 import web_service
+import sync
 
 # CONFIG
 with open('config.yaml', 'r') as file:
@@ -45,6 +46,9 @@ dependency_resolver.installed_store = local_packages
 dependency_resolver.web_repo = links_repo
 dependency_resolver.destination_dir = config['content_dir']
 os.makedirs(dependency_resolver.destination_dir, exist_ok=True)
+
+if config['sync']:
+    sync.connectionInfo = config['sync']
 
 # HTTP SERVICE
 web_service.store = links_repo

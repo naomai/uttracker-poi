@@ -22,7 +22,13 @@ unrealpoi:
         
     content_dir: "./Storage/MapContent/"
 
-    
+    ### Sync over FTP (disabled by default)
+    #sync:
+    #    server: "ftp.example.com"
+    #    username: "anonymous"
+    #    password: ""
+    #    remote_dir: "/public_html/UTMP"
+
 
         
     
