@@ -29,7 +29,10 @@ def unpack(archive_path: str):
         patoolib.extract_archive(archive=archive_path, outdir=wd)
         copy_flat(wd, destination_dir)
     finally:
-        shutil.rmtree(wd)
+        def handle_readonly(_, file):
+            os.chmod(file, stat.S_IWRITE)
+            os.remove(file)
+        shutil.rmtree(wd, onerror=handle_readonly)
     return destination_dir
     
 def copy_flat(src: str, dest: str):
